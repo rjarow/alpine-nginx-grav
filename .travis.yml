@@ -1,0 +1,25 @@
+language: python
+python:
+- 2.7
+env:
+  global:
+  - secure: WslLaznmoDAkFRKmhFanoJb9he3mOnjYCRyBV84031UEAcik4dc6tqGwZerNox8PaibBEftQ/ovgreh1MiLqhZBOnr6sL2E8NBrhROn8gimhJhbtNDtekmKvhhb114zG0U8zgEI6lDy5IO4U3lcSsBsRqxwmdognjkC9c0VTwKFbFHmLFkiSyF7lh6WaJKU9IWq9fLydvSG0AqyXKUgqRlN2Mt2jWcKo0MNWUBVFdpXsi4oDjPHtsNYDMQV/4xh+cMz8PAgtBHwpoxXZxTECJRnU1VmvcNJhnJ5z8Oveyxq6lQZs/z+VzVHzw6PxxsOE8LYGF2/voVG1fG/d5QBUEO4R8T3bou6vEOVe7mXASLoktyKI6oFwkFjR/WrT4pe9JcXmqH0a83aQROecaBqDHkyWOQPzC7ykNa+SAlR5jzghnTFjzZHX4gt6KsI3c25WIJOAHKwbU3LxbItGWMMcQK7QS0Qao/K8d7IcQmZTKlwj/AB4JUG4hbHzqcG5oAr1g2FlYqHuwf01runDgcgdp4Xo1MZ13c851hlzDpfadh8FlaUHPELZnBpOH2JivI9Ucd5MkqiAJAr4s0/2ya8Ge0BU1jW/06mEoPAbAbghXxYVxATtxejWwgT8VW38dpduuovjEwIJoTIYbfjml3O0k+bEtlNrq3qmBN7OrUR9QJA=
+  - secure: XhnEl00VUs0bjYSkorW/eXyMe0KEH9CcjUCEJdp7rJr2HMQg5mTsxul2Dxblg3DlFsMxm3CvZGLdzoYxk2hguLmmV7Wc8vH/HJlyaSZcsByP1Rh/GTYfFV5VTgyqdl1KBKNIU1ume0RdPS6MNzfInwv7/JHIMmGdQL5757dRZLeGDx+RXjCQkcYSZMMpMU/VdJY4lzG2yWbCtlCG2xYh2x9q1/VXU5E0wF0Zt3zr3jUiCUuEErg1E+7tfq3BWXwseBk8gXdcAjYjwtCsXsiGn1dFp0Kv+PuTMjimq3Tve1fK0zNC9q0U7Z63/JsYv+O5XwEmdKJ8ge12s/VsgbvrmIRD3DRRwzEpO8LfZDDZ/sr0YL9UHM+kLj6sTKOeVxnZ3WnqeMvVXs+KZqPGL52GvjkZyiYJ8AG2gSzB/Pk3Rn0VX4+WVmWyHLsRTdG8J9Cbrv0CE3le/6yNUcKQ+dmUvCYPTt9IsHqH65OqtikN88sdc9JcceNRYg+A/Ia0xYgIm+BQUQUlbwQDPii7NnL1thTS7zSKxbVMy8J0R2eUAzYWGsSwlmk3DbSw6LkJUEwqwSa/5QZNSb4ajCsqbo7UWpDAg4yujVv0nv8QoR+6tiSAwEX3vfyOzDf8UQieu4Qzhwo/ZdLri1MPChh/lQ6hbme57+AFMqIy4Pjmcd/G2dY=
+services:
+- docker
+install:
+- docker build -t anp .
+- docker run -d -p 127.0.0.1:80:80 --name grav grav
+script:
+- docker ps | grep -q grav
+- export TAG=`if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master"
+  ]]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+- export REPO=containah/alpine-nginx-grav
+- echo $REPO:$TAG
+- docker build -t $REPO:$TAG .
+after_success:
+- docker login -u=$DOCKER_USER -p=$DOCKER_PASS
+- if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
+  docker tag $REPO:$TAG $REPO:$TRAVIS_BUILD_NUMBER; docker push $REPO:$TRAVIS_BUILD_NUMBER;
+  fi
+- docker push $REPO:$TAG
