@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv bash
+
+if [ ! -d /usr/html/system ] ; then
+  curl -fLk -o /tmp/grav.zip  "https://github.com/getgrav/grav/releases/download/$GRAV_VERSION/grav-admin-v$GRAV_VERSION.zip"
+  mkdir /tmp/grav-src
+  unzip /tmp/grav.zip -d /tmp/grav-src
+  mv -f /tmp/grav-src/grav-admin/* /usr/html/
+  rm -R /tmp/grav*
+  chown -R nginx:nginx /usr/html
+else
+  chown -R nginx:nginx /usr/html
+fi
+
+chown -R nginx:nginx /usr/html
+
+find /usr/html -type f | xargs chmod 664
+find /usr/html -type d | xargs chmod 775
+find /usr/html -type d | xargs chmod +s
