@@ -1,15 +1,39 @@
-FROM rjarow/alpine-nginx-phpfpm
-# This container picks up my nginx/php image as a base and does all the work using s6-overlay once the files are copied in.
-# nginx and phpfpm run as services under s6
+FROM rjarow/alpine64-s6:3.7.0
 LABEL maintainer "Rich J github.com/rjarow" architecture="AMD64/x86_64"
 
-# Set grav version desired here.
+# Set grav version here
 ENV GRAV_VERSION="1.3.10"
+
+RUN apk update && \
+    # Packages you want
+    apk add bash less vim nginx ca-certificates git tzdata zip \
+    libmcrypt-dev zlib-dev gmp-dev zendframework\
+    freetype-dev libjpeg-turbo-dev libpng-dev mysql-client curl \
+    # PHP Modules
+    php7-fpm php7-json php7-zlib php7-xml php7-simplexml php7-pdo php7-phar \
+    php7-openssl php7-pdo_mysql php7-mysqli php7-session \
+    php7-gd php7-iconv php7-mcrypt php7-gmp php7-zip \
+    php7-curl php7-opcache php7-ctype php7-apcu \
+    php7-intl php7-bcmath php7-dom php7-mbstring php7-xmlreader && \
+    # Add musl
+    apk add -u musl && \
+    # Delete cache
+    rm -rf /var/cache/apk/*
+
+RUN \
+    # Modify PHP Settings
+    sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php7/php.ini && \
+    sed -i 's/expose_php = On/expose_php = Off/g' /etc/php7/php.ini && \
+    # Allow nginx user a bash shell
+    sed -i "s/nginx:x:100:101:nginx:\/var\/lib\/nginx:\/sbin\/nologin/nginx:x:100:101:nginx:\/usr:\/bin\/bash/g" /etc/passwd && \
+    sed -i "s/nginx:x:100:101:nginx:\/var\/lib\/nginx:\/sbin\/nologin/nginx:x:100:101:nginx:\/usr:\/bin\/bash/g" /etc/passwd- && \
+    # Link executables
+    ln -s /sbin/php-fpm7 /sbin/php-fpm
 
 COPY files/ /
 
-# files/etc/cont-init.d/90-grav does all the heavy lifting here.
+ENV TERM="xterm"
 
-# These can be removed later once nginx-phpfpm dev goes to master, added in that image as well
-RUN apk update && \
-    apk add zendframework php7-simplexml
+EXPOSE 80
+
+VOLUME ["/usr"]
