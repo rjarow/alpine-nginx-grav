@@ -2,7 +2,7 @@ FROM rjarow/alpine64-s6:3.7.0
 LABEL maintainer "Rich J github.com/rjarow" architecture="AMD64/x86_64"
 
 # Set grav version here
-ENV GRAV_VERSION="1.3.10"
+ENV GRAV_VERSION="1.4.0"
 
 RUN apk update && \
     # Packages you want
