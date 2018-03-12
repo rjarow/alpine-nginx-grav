@@ -14,7 +14,8 @@ RUN apk update && \
     php7-openssl php7-pdo_mysql php7-mysqli php7-session \
     php7-gd php7-iconv php7-mcrypt php7-gmp php7-zip \
     php7-curl php7-opcache php7-ctype php7-apcu \
-    php7-intl php7-bcmath php7-dom php7-mbstring php7-xmlreader && \
+    php7-intl php7-bcmath php7-dom php7-mbstring php7-xmlreader \
+    php7-pdo php7-pdo_sqlite php7-pdo_mysql php7-sqlite3 && \
     # Add musl
     apk add -u musl && \
     # Delete cache
